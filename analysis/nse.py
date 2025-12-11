@@ -7,7 +7,7 @@ from src.utils.basic import StockAnalysis
 ns = Nse()
 
 stock_codes = ns.get_stock_codes()
-stock_codes = stock_codes[:25]
+stock_codes = stock_codes[:100]
 
 def get_stock(stock_code: str):
     stock_id = stock_code + '.NS'

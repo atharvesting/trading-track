@@ -9,8 +9,6 @@ class StockAnalysis:
         
     def get_sma(self, window: int):
         return self.data['Close'].rolling(window=window).mean()
-    
-    
         
 def from_csv(file_path: str) -> StockAnalysis:
     """Creates a StockAnalysis object from a local CSV file."""
