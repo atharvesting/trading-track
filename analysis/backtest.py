@@ -12,7 +12,7 @@ import pandas as pd
 # data = rel.history(start='2020-01-01', end='2025-12-01')
 # data.to_csv('src/Basic/data/reliance_data.csv')  # Save for reuse
 
-data = pd.read_csv('analysis/reliance_data.csv')
+data = pd.read_csv('data/raw/reliance_data.csv')
 
 class SmaCross(Strategy):
     def init(self):
