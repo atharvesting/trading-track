@@ -6,7 +6,7 @@ import os
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 sys.path.append(project_root)
 
-from src.utils.basic import StockAnalysis
+from screens import StockAnalysis
 
 df = pd.read_csv('data/raw/reliance_data.csv', parse_dates=["Date"], index_col="Date")
 

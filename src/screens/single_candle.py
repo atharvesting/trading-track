@@ -4,6 +4,7 @@ import numpy as np
 class Candle:
     def __init__(self, row_data: pd.Series):
         self.date = row_data.Date
+        self.index = row_data.index
         self.o = row_data.Open
         self.c = row_data.Close
         self.h = row_data.High
@@ -18,35 +19,44 @@ class Candle:
     def __repr__(self):
         return f"{self.date}, O - {self.o}, C - {self.c}, H - {self.h}, L - {self.l}"
 
-
 class SingleCandleAnalyser:
-    def __init__(self, data: pd.DataFrame):
-        self.data = data
-        
-    def fetch_candle(self, index):
-        return self.data[index]
-        
-    def is_long(self, index, multiplier=2.0, lookback=10) -> bool:
-        candle = self.fetch_candle(index)
-        avg_body = get_avg_body(data, self, lookback)
-        return candle.body > multiplier * avg_body
-    
-    def is_bozo(self, proportion: float, multiplier, lookback) -> bool:
-        # try:
-        #     if 0 < proportion < 1:
-        #         pass
-        # except:
-        #     raise ValueError("Proportion must be between 0 and 1")
-        return self.is_long(multiplier, lookback) and self.body_weight > proportion
+    def __init__(self, file_path: str):
+        self.data = pd.read_csv(file_path)
+        self.default_lookback:int = 10
+        self.default_proportion:float = 0.9
+        self.default_multiplier:float = 2
 
-    def get_last_n_candles(data: pd.DataFrame, candle: Candle, range: int):
-        index = index_from_date(data, candle.date)  # Fixed: pass data first, then date
-        start = max(0, index - range)
-        return data.loc[start:index]
-        
-    def get_avg_body(data: pd.DataFrame, candle: Candle, lookback: int) -> float:
-        previous_candles = get_last_n_candles(data, candle, lookback)
-        return abs(previous_candles.Close - previous_candles.Open).mean()
-
-    def index_from_date(data: pd.DataFrame, date) -> int:  # Fixed: swapped parameters and return int
+    @staticmethod
+    def index_from_date(data:pd.DataFrame, date) -> int:
         return data[data.Date == date].index[0]
+        
+    def fetch_candle(self, srn) -> Candle:
+        return Candle(self.data.loc[srn])
+
+    def get_last_n_candles(self, srn, lookback:int = None) -> list[Candle]:
+        lookback = self.default_lookback if lookback is None else lookback
+        candles = list(map(
+            lambda serial: self.fetch_candle(serial),
+            list(range(max(srn - lookback, 0), srn))
+        ))
+        return candles
+        
+    def get_avg_body(self, srn, lookback:int = None) -> float:
+        lookback = self.default_lookback if lookback is None else lookback
+        previous_candles = self.get_last_n_candles(srn, lookback)
+        avg = [c.body for c in previous_candles]
+        return sum(avg) / len(avg)
+    
+    def is_long(self, srn, multiplier:float = None, lookback:int = None) -> bool:
+        lookback = self.default_lookback if lookback is None else lookback
+        multiplier = self.default_multiplier if multiplier is None else multiplier
+        c = self.fetch_candle(srn)
+        avg_body = self.get_avg_body(srn, lookback)
+        return c.body > multiplier * avg_body
+
+    def is_bozo(self, srn:int, proportion:float = None, multiplier:float = None, lookback:int = None) -> bool:
+        lookback = self.default_lookback if lookback is None else lookback
+        multiplier = self.default_multiplier if multiplier is None else multiplier
+        proportion = self.default_proportion if proportion is None else proportion
+        c = self.fetch_candle(srn)
+        return self.is_long(srn, multiplier, lookback) and c.body_weight > proportion

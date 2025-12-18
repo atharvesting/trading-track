@@ -5,6 +5,6 @@ import numpy as np
 
 nifty = yf.Ticker('COFORGE.NS')
 
-data = nifty.history(period='5d')
+data = nifty.history(period='5d', interval = '15m')
 
-data.to_csv('analysis/Time Series/Initial/coforge_5d.csv')
+data.to_csv('coforge_5d_15m.csv')

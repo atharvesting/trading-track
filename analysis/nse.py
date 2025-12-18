@@ -2,7 +2,7 @@ from nsetools import Nse
 import yfinance as yf
 import pandas as pd
 import numpy as np
-from src.utils.basic import StockAnalysis
+from screens import StockAnalysis
 
 ns = Nse()
 
