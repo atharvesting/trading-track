@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+# from sklearn.linear_model import LinearRegression
+# from statsmodels.tsa.deterministic import DeterministicProcess
 
 class Candle:
     def __init__(self, row_data: pd.Series):
@@ -26,9 +28,8 @@ class SingleCandleAnalyser:
         self.default_proportion:float = 0.9
         self.default_multiplier:float = 2
 
-    @staticmethod
-    def index_from_date(data:pd.DataFrame, date) -> int:
-        return data[data.Date == date].index[0]
+    def index_from_date(self, date) -> int:
+        return self.data[self.data.Date == date].index[0]
 
     def date_from_index(self, srn:int) -> str:
         return self.data.loc[srn].Date
@@ -63,3 +64,19 @@ class SingleCandleAnalyser:
         proportion = self.default_proportion if proportion is None else proportion
         c = self.fetch_candle(srn)
         return self.is_long(srn, multiplier, lookback) and c.body_weight > proportion
+
+    def get_sma(self, period:int = 15):
+        return self.data.Close.rolling(window=period).mean()
+
+    def get_xma(self, period:int = 15):
+        return self.data.Close.ewm(span=period, adjust=False).mean()
+
+    def get_trend(self, srn:int, lookback:int = 15, period:int = 15) -> tuple:
+        start_idx = max(0, srn - lookback)
+        y = self.data['Close'].iloc[start_idx: srn + 1].values  # Converts series to NumPy series
+        n = len(y)
+        if n < 2:
+            return 0.0, y[0] if n == 1 else 0.0
+        X = np.arange(n)
+        slope, intercept = np.polyfit(X, y, 1)
+        return slope, intercept

@@ -17,8 +17,3 @@ class StockPlot:
         bt = Backtest(self.data, self.NoTradeStrategy, cash=10000000)
         stats = bt.run()
         bt.plot()
-        
-data = pd.read_csv(r"C:\Users\Atharv Rawat\Desktop\Main\IT\Projects\Trading Track\data\raw\reliance_data.csv")
-plot = StockPlot(data)
-
-plot.plot()
