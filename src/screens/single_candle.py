@@ -29,6 +29,9 @@ class SingleCandleAnalyser:
     @staticmethod
     def index_from_date(data:pd.DataFrame, date) -> int:
         return data[data.Date == date].index[0]
+
+    def date_from_index(self, srn:int) -> str:
+        return self.data.loc[srn].Date
         
     def fetch_candle(self, srn) -> Candle:
         return Candle(self.data.loc[srn])
@@ -47,7 +50,7 @@ class SingleCandleAnalyser:
         avg = [c.body for c in previous_candles]
         return sum(avg) / len(avg)
     
-    def is_long(self, srn, multiplier:float = None, lookback:int = None) -> bool:
+    def is_long(self, srn:int, multiplier:float = None, lookback:int = None) -> bool:
         lookback = self.default_lookback if lookback is None else lookback
         multiplier = self.default_multiplier if multiplier is None else multiplier
         c = self.fetch_candle(srn)
